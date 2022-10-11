@@ -13,17 +13,23 @@ extension Target {
     public static func makeTargets(
         name: String,
         platform: Platform,
+        deploymentTarget: DeploymentTarget,
         additionalTargets: [String]
     ) -> [Target] {
         let appTargets = Target.makeAppTargets(
             name: name,
             platform: platform,
+            deploymentTarget: deploymentTarget,
             dependencies: additionalTargets.map {
                 TargetDependency.target(name: $0)
             }
         )
         let frameworkTargets = additionalTargets.flatMap {
-            Target.makeFrameworkTargets(name: $0, platform: platform)
+            Target.makeFrameworkTargets(
+                name: $0,
+                platform: platform,
+                deploymentTarget: deploymentTarget
+            )
         }
 
         return appTargets + frameworkTargets
@@ -32,6 +38,7 @@ extension Target {
     private static func makeAppTargets(
         name: String,
         platform: Platform,
+        deploymentTarget: DeploymentTarget,
         dependencies: [TargetDependency]
     ) -> [Target] {
         let mainTarget = Target(
@@ -39,7 +46,7 @@ extension Target {
             platform: platform,
             product: .app,
             bundleId: "\(organizationIdentifier).\(name)",
-            deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+            deploymentTarget: deploymentTarget,
             infoPlist: .file(path: "Targets/\(name)/Supports/Info.plist"),
             sources: ["Targets/\(name)/Sources/**"],
             resources: ["Targets/\(name)/Resources/**"],
@@ -50,7 +57,7 @@ extension Target {
             platform: platform,
             product: .unitTests,
             bundleId: "\(organizationIdentifier).\(name)Tests",
-            deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+            deploymentTarget: deploymentTarget,
             infoPlist: .default,
             sources: ["Targets/\(name)/Tests/**"],
             dependencies: [.target(name: "\(name)")]
@@ -61,14 +68,15 @@ extension Target {
 
     private static func makeFrameworkTargets(
         name: String,
-        platform: Platform
+        platform: Platform,
+        deploymentTarget: DeploymentTarget
     ) -> [Target] {
         let sources = Target(
             name: name,
             platform: platform,
             product: .framework,
             bundleId: "\(organizationIdentifier).\(name)",
-            deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+            deploymentTarget: deploymentTarget,
             infoPlist: .default,
             sources: ["Targets/\(name)/Sources/**"],
             resources: [],
@@ -79,7 +87,7 @@ extension Target {
             platform: platform,
             product: .unitTests,
             bundleId: "\(organizationIdentifier).\(name)Tests",
-            deploymentTarget: .iOS(targetVersion: "13.0", devices: [.iphone]),
+            deploymentTarget: deploymentTarget,
             infoPlist: .default,
             sources: ["Targets/\(name)/Tests/**"],
             resources: [],

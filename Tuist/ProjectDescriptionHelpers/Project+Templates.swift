@@ -24,9 +24,15 @@ extension Project {
             defaultSettings: .recommended
         )
 
+        let deploymentTarget: DeploymentTarget = .iOS(
+            targetVersion: "13.0",
+            devices: [.iphone]
+        )
+
         let targets = Target.makeTargets(
             name: name,
             platform: platform,
+            deploymentTarget: deploymentTarget,
             additionalTargets: additionalTargets
         )
 
