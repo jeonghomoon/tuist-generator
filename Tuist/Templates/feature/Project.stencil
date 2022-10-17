@@ -1,0 +1,8 @@
+import ProjectDescription
+import ProjectDescriptionHelpers
+
+let project = Project.makeProject(
+    name: "{{ name }}",
+    platform: .iOS,
+    additionalTargets: ["{{name}}UI", "{{name}}Domain", "{{name}}Data"]
+)
