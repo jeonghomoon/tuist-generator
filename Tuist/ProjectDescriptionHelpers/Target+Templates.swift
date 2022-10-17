@@ -8,6 +8,12 @@
 import ProjectDescription
 
 extension Target {
+    enum Feature: String {
+        case ui = "UI"
+        case domain = "Domain"
+        case data = "Data"
+    }
+
     private static let organizationIdentifier: String = "com.jeonghomoon"
     
     public static func makeTargets(
@@ -26,7 +32,8 @@ extension Target {
         )
         let frameworkTargets = additionalTargets.flatMap {
             Target.makeFrameworkTargets(
-                name: $0,
+                name: name,
+                framework: $0,
                 platform: platform,
                 deploymentTarget: deploymentTarget
             )
@@ -68,30 +75,33 @@ extension Target {
 
     private static func makeFrameworkTargets(
         name: String,
+        framework: String,
         platform: Platform,
         deploymentTarget: DeploymentTarget
     ) -> [Target] {
         let sources = Target(
-            name: name,
+            name: framework,
             platform: platform,
             product: .framework,
-            bundleId: "\(organizationIdentifier).\(name)",
+            bundleId: "\(organizationIdentifier).\(framework)",
             deploymentTarget: deploymentTarget,
             infoPlist: .default,
-            sources: ["Targets/\(name)/Sources/**"],
-            resources: [],
+            sources: ["Targets/\(framework)/Sources/**"],
+            resources: framework == name + Feature.ui.rawValue
+                ? ["Targets/\(framework)/Resources/**"]
+                : [],
             dependencies: []
         )
         let tests = Target(
-            name: "\(name)Tests",
+            name: "\(framework)Tests",
             platform: platform,
             product: .unitTests,
-            bundleId: "\(organizationIdentifier).\(name)Tests",
+            bundleId: "\(organizationIdentifier).\(framework)Tests",
             deploymentTarget: deploymentTarget,
             infoPlist: .default,
-            sources: ["Targets/\(name)/Tests/**"],
+            sources: ["Targets/\(framework)/Tests/**"],
             resources: [],
-            dependencies: [.target(name: name)]
+            dependencies: [.target(name: framework)]
         )
 
         return [sources, tests]
